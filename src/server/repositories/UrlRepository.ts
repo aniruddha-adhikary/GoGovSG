@@ -226,6 +226,7 @@ export class UrlRepository implements UrlRepositoryInterface {
       order,
       urlTableName,
       urlClicksTableName,
+      urlVector,
     )
 
     const urlsModel = await (isEmail
@@ -548,17 +549,22 @@ export class UrlRepository implements UrlRepositoryInterface {
    * @param  {SearchResultsSortOrder} order
    * @param  {string} urlTableName
    * @param  {string} urlClicksTableName
+   * @param  {string} urlVector
    * @returns The clause as a string.
    */
   private getRankingAlgorithm(
     order: SearchResultsSortOrder,
     urlTableName: string,
     urlClicksTableName: string,
+    urlVector: string,
   ): string {
     let rankingAlgorithm
     switch (order) {
       case SearchResultsSortOrder.Recency:
         rankingAlgorithm = `${urlTableName}."createdAt"`
+        break
+      case SearchResultsSortOrder.Relevance:
+        rankingAlgorithm = `ts_rank(${urlVector}, query)`
         break
       case SearchResultsSortOrder.Popularity:
         rankingAlgorithm = `${urlClicksTableName}.clicks`
